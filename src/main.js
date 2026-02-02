@@ -244,7 +244,10 @@ class MatDocument {
             id: elem.id,
             type: 'line_segment',
             from_cm: { ...elem.from_cm },
-            to_cm: { ...elem.to_cm }
+            to_cm: { ...elem.to_cm },
+            lineStyle: elem.lineStyle,
+            stroke: elem.stroke,
+            strokeWidth: elem.strokeWidth
           });
           break;
 
@@ -398,7 +401,10 @@ class MatDocument {
         this.createElement('line', {
           id: line.id,
           from_cm: line.from_cm,
-          to_cm: line.to_cm
+          to_cm: line.to_cm,
+          lineStyle: line.lineStyle,
+          stroke: line.stroke,
+          strokeWidth: line.strokeWidth
         });
       }
     };
@@ -1126,6 +1132,7 @@ class MatLayoutEditor {
     document.getElementById('btn-load').addEventListener('click', () => {
       document.getElementById('file-input').click();
     });
+    document.getElementById('btn-load-example').addEventListener('click', () => this.loadExample());
     document.getElementById('btn-save').addEventListener('click', () => this.saveFile());
     document.getElementById('btn-export-svg').addEventListener('click', () => this.exportSVG());
     document.getElementById('btn-export-png').addEventListener('click', () => this.exportPNG());
@@ -1136,6 +1143,27 @@ class MatLayoutEditor {
         this.loadFile(file);
       }
     });
+  }
+
+  loadExample() {
+    if (confirm('Load example layout? Any unsaved changes will be lost.')) {
+      fetch('example_layout.json')
+        .then(response => {
+          if (!response.ok) throw new Error('Example not found');
+          return response.json();
+        })
+        .then(json => {
+          this.document.fromJSON(json);
+          this.renderer.setupViewBox(); // Important if mat size changed
+          this.render();
+          this.updateElementsList();
+          this.updateStatus('Example layout loaded');
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Failed to load example: ' + err.message);
+        });
+    }
   }
 
   setTool(tool) {

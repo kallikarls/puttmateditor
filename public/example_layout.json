@@ -1,0 +1,158 @@
+{
+    "metadata": {
+        "version": "1.0",
+        "editor": "mat-layout-editor",
+        "savedAt": "2024-05-21T10:00:00.000Z"
+    },
+    "mat": {
+        "width_cm": 65,
+        "length_cm": 300,
+        "origin": "top_left",
+        "units": "cm"
+    },
+    "markers": [
+        {
+            "id": "hole_1",
+            "type": "target",
+            "center_cm": {
+                "x": 32.5,
+                "y": 280
+            },
+            "radius_cm": 5
+        }
+    ],
+    "areas": [
+        {
+            "id": "start_zone",
+            "type": "rect",
+            "x0_cm": 10,
+            "y0_cm": 10,
+            "x1_cm": 55,
+            "y1_cm": 40
+        }
+    ],
+    "lines": [
+        {
+            "id": "center_line",
+            "type": "line_segment",
+            "from_cm": {
+                "x": 32.5,
+                "y": 40
+            },
+            "to_cm": {
+                "x": 32.5,
+                "y": 275
+            },
+            "stroke": "#ffffff",
+            "strokeWidth": 1,
+            "lineStyle": "dashed"
+        },
+        {
+            "id": "aim_line_left",
+            "type": "line_segment",
+            "from_cm": {
+                "x": 22.5,
+                "y": 40
+            },
+            "to_cm": {
+                "x": 22.5,
+                "y": 275
+            },
+            "stroke": "#aaaaaa",
+            "strokeWidth": 1,
+            "lineStyle": "dotted"
+        },
+        {
+            "id": "aim_line_right",
+            "type": "line_segment",
+            "from_cm": {
+                "x": 42.5,
+                "y": 40
+            },
+            "to_cm": {
+                "x": 42.5,
+                "y": 275
+            },
+            "stroke": "#aaaaaa",
+            "strokeWidth": 1,
+            "lineStyle": "dotted"
+        }
+    ],
+    "texts": [
+        {
+            "id": "label_start",
+            "type": "text",
+            "position_cm": {
+                "x": 32.5,
+                "y": 25
+            },
+            "text": "START ZONE",
+            "rotation": 0,
+            "fontSize": 4,
+            "fontFamily": "Inter",
+            "fill": "#ffffff",
+            "textAnchor": "middle"
+        },
+        {
+            "id": "label_side",
+            "type": "text",
+            "position_cm": {
+                "x": 5,
+                "y": 150
+            },
+            "text": "3.0 METERS",
+            "rotation": 90,
+            "fontSize": 3,
+            "fontFamily": "Inter",
+            "fill": "#888888",
+            "textAnchor": "middle"
+        }
+    ],
+    "sectors": [
+        {
+            "id": "wedge_L1",
+            "type": "annulus_sector",
+            "center_cm": {
+                "x": 32.5,
+                "y": 280
+            },
+            "innerRadius_cm": 15,
+            "outerRadius_cm": 30,
+            "startAngle": 200,
+            "endAngle": 215,
+            "fill": "rgba(255, 165, 0, 0.3)",
+            "stroke": "orange",
+            "strokeWidth": 1
+        },
+        {
+            "id": "wedge_L2",
+            "type": "annulus_sector",
+            "center_cm": {
+                "x": 32.5,
+                "y": 280
+            },
+            "innerRadius_cm": 30,
+            "outerRadius_cm": 45,
+            "startAngle": 200,
+            "endAngle": 215,
+            "fill": "rgba(255, 165, 0, 0.2)",
+            "stroke": "orange",
+            "strokeWidth": 1
+        },
+        {
+            "id": "wedge_R1",
+            "type": "annulus_sector",
+            "center_cm": {
+                "x": 32.5,
+                "y": 280
+            },
+            "innerRadius_cm": 15,
+            "outerRadius_cm": 30,
+            "startAngle": 325,
+            "endAngle": 340,
+            "fill": "rgba(255, 165, 0, 0.3)",
+            "stroke": "orange",
+            "strokeWidth": 1
+        }
+    ]
+}
