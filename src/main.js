@@ -257,6 +257,7 @@ class MatDocument {
             y0_cm: elem.y0_cm,
             x1_cm: elem.x1_cm,
             y1_cm: elem.y1_cm,
+            fill: elem.fill,
             zOrder: elem.zOrder
           });
           break;
@@ -363,6 +364,7 @@ class MatDocument {
           y0_cm: area.y0_cm,
           x1_cm: area.x1_cm,
           y1_cm: area.y1_cm,
+          fill: area.fill,
           zOrder: area.zOrder
         });
       }
@@ -386,6 +388,7 @@ class MatDocument {
       for (const arc of json.arcs) {
         this.createElement('arc', {
           id: arc.id,
+          center_cm: arc.center_cm,
           radius_cm: arc.radius_cm,
           startAngle: arc.startAngle || 180,
           endAngle: arc.endAngle || 360,
@@ -453,6 +456,7 @@ class MatDocument {
     };
 
     parseLines(json.aiming_guides);
+    parseLines(json.lines);
     if (json.behind_hole_guides) {
       parseLines(json.behind_hole_guides.v_lines);
       parseLines(json.behind_hole_guides.vertical_guides);
