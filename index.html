@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Putting Mat Layout Editor</title>
+  <meta name="description" content="Create and edit putting mat layouts for golf practice applications" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-brand">
+        <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+        <h1>Mat Layout Editor</h1>
+      </div>
+      <div class="header-actions">
+        <button id="btn-new" class="btn btn-secondary" title="New Layout">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="12" y1="18" x2="12" y2="12" />
+            <line x1="9" y1="15" x2="15" y2="15" />
+          </svg>
+          <span>New</span>
+        </button>
+        <button id="btn-load" class="btn btn-secondary" title="Load JSON">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+          </svg>
+          <span>Load</span>
+        </button>
+        <button id="btn-save" class="btn btn-primary" title="Save JSON">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+            <polyline points="17 21 17 13 7 13 7 21" />
+            <polyline points="7 3 7 8 15 8" />
+          </svg>
+          <span>Save</span>
+        </button>
+        <div class="dropdown">
+          <button id="btn-export" class="btn btn-accent" title="Export">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            <span>Export</span>
+          </button>
+          <div class="dropdown-menu" id="export-menu">
+            <button id="btn-export-svg">Export as SVG</button>
+            <button id="btn-export-png">Export as PNG</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Toolbar -->
+      <aside class="toolbar">
+        <div class="toolbar-section">
+          <h3>Tools</h3>
+          <button id="tool-select" class="tool-btn active" title="Select (V)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z" />
+            </svg>
+          </button>
+          <button id="tool-pan" class="tool-btn" title="Pan (Space)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0" />
+              <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2" />
+              <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8" />
+              <path
+                d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
+            </svg>
+          </button>
+        </div>
+        <div class="toolbar-section">
+          <h3>Add Elements</h3>
+          <button id="add-rect" class="tool-btn" title="Add Rectangle Area">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+            </svg>
+          </button>
+          <button id="add-circle" class="tool-btn" title="Add Circle/Hole">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="9" />
+            </svg>
+          </button>
+          <button id="add-marker" class="tool-btn" title="Add Ball Marker">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="4" />
+              <circle cx="12" cy="12" r="8" />
+            </svg>
+          </button>
+          <button id="add-line" class="tool-btn" title="Add Line">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="19" x2="19" y2="5" />
+            </svg>
+          </button>
+          <button id="add-arc" class="tool-btn" title="Add Arc">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12c0-4.97 4.03-9 9-9" />
+            </svg>
+          </button>
+          <button id="add-sector" class="tool-btn" title="Add Sector">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12 A9 9 0 0 0 3 12 L12 12 Z" />
+            </svg>
+          </button>
+          <button id="add-text" class="tool-btn" title="Add Text">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 7V4h16v3" />
+              <path d="M12 4v16" />
+              <path d="M8 20h8" />
+            </svg>
+          </button>
+        </div>
+        <div class="toolbar-section">
+          <h3>View</h3>
+          <button id="btn-zoom-in" class="tool-btn" title="Zoom In (+)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              <line x1="11" y1="8" x2="11" y2="14" />
+              <line x1="8" y1="11" x2="14" y2="11" />
+            </svg>
+          </button>
+          <button id="btn-zoom-out" class="tool-btn" title="Zoom Out (-)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              <line x1="8" y1="11" x2="14" y2="11" />
+            </svg>
+          </button>
+          <button id="btn-zoom-fit" class="tool-btn" title="Fit to View (0)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+            </svg>
+          </button>
+          <div class="divider" style="width:1px; height:24px; background:rgba(255,255,255,0.1); margin:0 4px;"></div>
+          <button id="btn-snap" class="tool-btn active" title="Snap to Grid (Toggle)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M7 7h10v10H7z" />
+              <path d="M7 3v4m10-4v4m0 10v4M7 17v4m-4-10h4m10 0h4m-14 10h4m-4-10H3" />
+            </svg>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Canvas Area -->
+      <div class="canvas-container" id="canvas-container">
+        <div class="canvas-info" id="canvas-info">
+          <span id="zoom-level">100%</span>
+          <span id="cursor-pos">X: 0 cm, Y: 0 cm</span>
+        </div>
+        <svg id="canvas" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="grid-small" width="10" height="10" patternUnits="userSpaceOnUse">
+              <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.5" />
+            </pattern>
+            <pattern id="grid-large" width="50" height="50" patternUnits="userSpaceOnUse">
+              <rect width="50" height="50" fill="url(#grid-small)" />
+              <path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+            </pattern>
+          </defs>
+          <g id="canvas-grid"></g>
+          <g id="canvas-content"></g>
+          <g id="canvas-handles"></g>
+        </svg>
+      </div>
+
+      <!-- Property Panel -->
+      <aside class="property-panel" id="property-panel">
+        <div class="panel-header">
+          <h2>Properties</h2>
+        </div>
+
+        <!-- Mat Properties (shown when no element selected) -->
+        <div id="mat-properties" class="panel-section">
+          <h3>Mat Dimensions</h3>
+          <div class="property-row">
+            <label for="mat-width">Width (cm)</label>
+            <input type="number" id="mat-width" value="50" min="10" max="200" step="0.5">
+          </div>
+          <div class="property-row">
+            <label for="mat-length">Length (cm)</label>
+            <input type="number" id="mat-length" value="400" min="50" max="1000" step="1">
+          </div>
+          <div class="property-row">
+            <label for="mat-color">Mat Color</label>
+            <input type="color" id="mat-color" value="#1a4d2e">
+          </div>
+        </div>
+
+        <!-- Element Properties (shown when element selected) -->
+        <div id="element-properties" class="panel-section" style="display: none;">
+          <h3>Selected Element</h3>
+          <div class="property-row">
+            <label for="elem-id">ID</label>
+            <input type="text" id="elem-id" placeholder="element_id">
+          </div>
+          <div class="property-row">
+            <label for="elem-type">Type</label>
+            <select id="elem-type" disabled>
+              <option value="rect">Rectangle</option>
+              <option value="circle">Circle</option>
+              <option value="marker">Ball Marker</option>
+              <option value="line">Line</option>
+              <option value="arc">Arc</option>
+            </select>
+          </div>
+
+          <!-- Position (for all elements) -->
+          <h4>Position</h4>
+          <div id="rect-props">
+            <div class="property-row property-row-double">
+              <div>
+                <label for="elem-x0">X0 (cm)</label>
+                <input type="number" id="elem-x0" step="0.1">
+              </div>
+              <div>
+                <label for="elem-y0">Y0 (cm)</label>
+                <input type="number" id="elem-y0" step="0.1">
+              </div>
+            </div>
+            <div class="property-row property-row-double">
+              <div>
+                <label for="elem-x1">X1 (cm)</label>
+                <input type="number" id="elem-x1" step="0.1">
+              </div>
+              <div>
+                <label for="elem-y1">Y1 (cm)</label>
+                <input type="number" id="elem-y1" step="0.1">
+              </div>
+            </div>
+          </div>
+          <div id="circle-props" style="display:none;">
+            <div class="property-row property-row-double">
+              <div>
+                <label for="elem-cx">Center X (cm)</label>
+                <input type="number" id="elem-cx" step="0.1">
+              </div>
+              <div>
+                <label for="elem-cy">Center Y (cm)</label>
+                <input type="number" id="elem-cy" step="0.1">
+              </div>
+            </div>
+            <div class="property-row">
+              <label for="elem-radius">Radius (cm)</label>
+              <input type="number" id="elem-radius" step="0.1" min="0.1">
+            </div>
+          </div>
+          <div id="line-props" style="display:none;">
+            <div class="property-row property-row-double">
+              <div>
+                <label for="elem-lx1">From X (cm)</label>
+                <input type="number" id="elem-lx1" step="0.1">
+              </div>
+              <div>
+                <label for="elem-ly1">From Y (cm)</label>
+                <input type="number" id="elem-ly1" step="0.1">
+              </div>
+            </div>
+            <div class="property-row property-row-double">
+              <div>
+                <label for="elem-lx2">To X (cm)</label>
+                <input type="number" id="elem-lx2" step="0.1">
+              </div>
+              <div>
+                <label for="elem-ly2">To Y (cm)</label>
+                <input type="number" id="elem-ly2" step="0.1">
+              </div>
+            </div>
+            <div class="property-row property-row-double">
+              <div>
+                <label for="elem-line-style">Style</label>
+                <select id="elem-line-style">
+                  <option value="solid">Solid</option>
+                  <option value="dashed">Dashed</option>
+                  <option value="dotted">Dotted</option>
+                </select>
+              </div>
+              <div>
+                <label for="elem-line-angle">Angle (°)</label>
+                <input type="number" id="elem-line-angle" readonly disabled
+                  style="background: rgba(255,255,255,0.05); color: #aaa;">
+              </div>
+            </div>
+          </div>
+          <div id="arc-props" style="display:none;">
+            <div class="property-row property-row-double">
+              <div>
+                <label for="elem-acx">Center X (cm)</label>
+                <input type="number" id="elem-acx" step="0.1">
+              </div>
+              <div>
+                <label for="elem-acy">Center Y (cm)</label>
+                <input type="number" id="elem-acy" step="0.1">
+              </div>
+            </div>
+            <div class="property-row">
+              <label for="elem-arc-radius">Radius (cm)</label>
+              <input type="number" id="elem-arc-radius" step="0.1" min="0.1">
+            </div>
+            <div class="property-row property-row-double">
+              <div>
+                <label for="elem-arc-start">Start Angle (°)</label>
+                <input type="number" id="elem-arc-start" step="1" min="0" max="360">
+              </div>
+              <div>
+                <label for="elem-arc-end">End Angle (°)</label>
+                <input type="number" id="elem-arc-end" step="1" min="0" max="360">
+              </div>
+            </div>
+          </div>
+          <div id="text-props" style="display:none;">
+            <div class="property-row property-row-double">
+              <div>
+                <label for="elem-text-x">X (cm)</label>
+                <input type="number" id="elem-text-x" step="0.1">
+              </div>
+              <div>
+                <label for="elem-text-y">Y (cm)</label>
+                <input type="number" id="elem-text-y" step="0.1">
+              </div>
+            </div>
+            <div class="property-row">
+              <label for="elem-text-content">Text</label>
+              <input type="text" id="elem-text-content" placeholder="Enter text...">
+            </div>
+            <div class="property-row">
+              <label for="elem-text-rotation">Rotation (°)</label>
+              <input type="number" id="elem-text-rotation" step="15" value="0">
+            </div>
+            <div class="property-row">
+              <label for="elem-text-font">Font Family</label>
+              <select id="elem-text-font">
+                <option value="Inter">Inter</option>
+                <option value="Arial">Arial</option>
+                <option value="Helvetica">Helvetica</option>
+                <option value="Georgia">Georgia</option>
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Courier New">Courier New</option>
+                <option value="Verdana">Verdana</option>
+              </select>
+            </div>
+            <div class="property-row property-row-double">
+              <div>
+                <label for="elem-text-size">Size (cm)</label>
+                <input type="number" id="elem-text-size" step="0.1" min="0.5" value="3">
+              </div>
+              <div>
+                <label for="elem-text-style">Style</label>
+                <select id="elem-text-style">
+                  <option value="normal">Normal</option>
+                  <option value="bold">Bold</option>
+                  <option value="italic">Italic</option>
+                  <option value="bold-italic">Bold Italic</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div id="sector-props" style="display:none;">
+            <div class="property-row property-row-double">
+              <div>
+                <label for="elem-sector-x">Center X</label>
+                <input type="number" id="elem-sector-x" step="0.1">
+              </div>
+              <div>
+                <label for="elem-sector-y">Center Y</label>
+                <input type="number" id="elem-sector-y" step="0.1">
+              </div>
+            </div>
+            <div class="property-row property-row-double">
+              <div>
+                <label for="elem-sector-inner">Inner Radius (cm)</label>
+                <input type="number" id="elem-sector-inner" step="0.1" min="0">
+              </div>
+              <div>
+                <label for="elem-sector-outer">Outer Radius (cm)</label>
+                <input type="number" id="elem-sector-outer" step="0.1" min="0">
+              </div>
+            </div>
+            <div class="property-row property-row-double">
+              <div>
+                <label for="elem-sector-start">Start Angle (°)</label>
+                <input type="number" id="elem-sector-start" step="1">
+              </div>
+              <div>
+                <label for="elem-sector-end">End Angle (°)</label>
+                <input type="number" id="elem-sector-end" step="1">
+              </div>
+            </div>
+            <div class="property-row" style="margin-top: 10px; display: flex; gap: 8px;">
+              <button id="btn-sector-above" class="btn-secondary" style="flex:1; font-size: 0.8rem;">Add Above</button>
+              <button id="btn-sector-below" class="btn-secondary" style="flex:1; font-size: 0.8rem;">Add Below</button>
+            </div>
+          </div>
+
+          <!-- Style -->
+          <h4>Style</h4>
+          <div class="property-row">
+            <label for="elem-fill">Fill Color</label>
+            <div class="color-input-wrapper">
+              <input type="color" id="elem-fill" value="#4a9eff">
+              <label class="checkbox-wrapper">
+                <input type="checkbox" id="elem-fill-none">
+                <span>No Fill</span>
+              </label>
+            </div>
+          </div>
+          <div class="property-row">
+            <label for="elem-stroke">Stroke Color</label>
+            <div class="color-input-wrapper">
+              <input type="color" id="elem-stroke" value="#ffffff">
+              <label class="checkbox-wrapper">
+                <input type="checkbox" id="elem-stroke-none">
+                <span>No Stroke</span>
+              </label>
+            </div>
+          </div>
+          <div class="property-row" id="stroke-width-row">
+            <label for="elem-stroke-width">Stroke Width</label>
+            <input type="number" id="elem-stroke-width" step="0.1" min="0" value="1">
+          </div>
+
+          <!-- Actions -->
+          <div class="panel-actions">
+            <button id="btn-delete-element" class="btn btn-danger">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
+              Delete
+            </button>
+            <button id="btn-duplicate-element" class="btn btn-secondary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>
+              Duplicate
+            </button>
+          </div>
+        </div>
+
+        <!-- Elements List -->
+        <div class="panel-section">
+          <h3>Elements</h3>
+          <div id="elements-list" class="elements-list">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Status Bar -->
+    <footer class="status-bar">
+      <span id="status-message">Ready</span>
+      <span id="element-count">0 elements</span>
+    </footer>
+  </div>
+
+  <!-- Hidden file input -->
+  <input type="file" id="file-input" accept=".json" style="display:none">
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
