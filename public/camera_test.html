@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>High FPS Camera Tester</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            background: #111;
+            color: #eee;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        video {
+            width: 100%;
+            border: 1px solid #333;
+            background: #000;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+            background: #222;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .stat-box {
+            text-align: center;
+        }
+
+        .stat-label {
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #00ffa3;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        #log {
+            margin-top: 20px;
+            font-family: monospace;
+            color: #aaa;
+            white-space: pre-wrap;
+            height: 200px;
+            overflow-y: auto;
+            background: #000;
+            padding: 10px;
+            border: 1px solid #333;
+        }
+
+        select {
+            padding: 10px;
+            border-radius: 4px;
+            background: #333;
+            color: white;
+            border: 1px solid #444;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Camera FPS Tester</h1>
+        <div style="margin-bottom: 20px;">
+            <select id="cameraSelect"></select>
+            <button id="btnStart60">Test 60 FPS</button>
+            <button id="btnStart120">Test 120 FPS</button>
+            <button id="btnStop" style="background: #dc3545;">Stop</button>
+        </div>
+
+        <video id="video" autoplay playsinline muted></video>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-label">Requested FPS</div>
+                <div class="stat-value" id="reqFps">-</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Actual FPS</div>
+                <div class="stat-value" id="actFps">-</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Resolution</div>
+                <div class="stat-value" id="res">-</div>
+            </div>
+        </div>
+
+        <div id="log"></div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const logDiv = document.getElementById('log');
+        let stream = null;
+        let frameCount = 0;
+        let lastTime = 0;
+        let rafId = null;
+
+        function log(msg) {
+            logDiv.textContent += msg + '\n';
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(msg);
+        }
+
+        async function getCameras() {
+            try {
+                const deviceInfos = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = deviceInfos.filter(d => d.kind === 'videoinput');
+                const select = document.getElementById('cameraSelect');
+                select.innerHTML = '';
+                videoDevices.forEach(device => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.text = device.label || `Camera ${select.length + 1}`;
+                    select.appendChild(option);
+                });
+                log(`Found ${videoDevices.length} cameras.`);
+            } catch (err) {
+                log('Error enumerating devices: ' + err.message);
+            }
+        }
+
+        async function startCamera(fps) {
+            if (stream) {
+                stopCamera();
+            }
+
+            const deviceId = document.getElementById('cameraSelect').value;
+            const constraints = {
+                video: {
+                    deviceId: deviceId ? { exact: deviceId } : undefined,
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                    frameRate: { ideal: fps, max: fps }
+                }
+            };
+
+            log(`Requesting ${fps} FPS...`);
+            document.getElementById('reqFps').textContent = fps;
+
+            try {
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = stream;
+
+                const track = stream.getVideoTracks()[0];
+                const settings = track.getSettings();
+                log(`Stream Info: ${settings.width}x${settings.height} @ ${settings.frameRate?.toFixed(2)} FPS (reported)`);
+                document.getElementById('res').textContent = `${settings.width}x${settings.height}`;
+
+                measureFps();
+            } catch (err) {
+                log('Error starting camera: ' + err.message);
+                log('Note: Some browsers block high FPS or resolution constraints.');
+            }
+        }
+
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            if (rafId) cancelAnimationFrame(rafId);
+            video.srcObject = null;
+            document.getElementById('actFps').textContent = '-';
+        }
+
+        function measureFps() {
+            frameCount = 0;
+            lastTime = performance.now();
+
+            function loop(now) {
+                frameCount++;
+                if (now - lastTime >= 1000) {
+                    const fps = Math.round((frameCount * 1000) / (now - lastTime));
+                    document.getElementById('actFps').textContent = fps;
+
+                    if (fps < 50) document.getElementById('actFps').style.color = '#ff4444';
+                    else if (fps < 100) document.getElementById('actFps').style.color = '#ffbb33';
+                    else document.getElementById('actFps').style.color = '#00ffa3';
+
+                    frameCount = 0;
+                    lastTime = now;
+                }
+                rafId = requestAnimationFrame(loop);
+            }
+            rafId = requestAnimationFrame(loop);
+        }
+
+        document.getElementById('btnStart60').onclick = () => startCamera(60);
+        document.getElementById('btnStart120').onclick = () => startCamera(120);
+        document.getElementById('btnStop').onclick = stopCamera;
+
+        navigator.mediaDevices.getUserMedia({ video: true }).then(() => {
+            getCameras();
+        }).catch(e => log('Permission denied: ' + e.message));
+
+    </script>
+</body>
+
+</html>

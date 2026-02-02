@@ -26,6 +26,36 @@ class MatDocument {
     this.dirty = false;
   }
 
+  getNextZOrder() {
+    if (this.elements.length === 0) return 0;
+    return Math.max(...this.elements.map(e => e.zOrder || 0)) + 1;
+  }
+
+  getMinZOrder() {
+    if (this.elements.length === 0) return 0;
+    return Math.min(...this.elements.map(e => e.zOrder || 0)) - 1;
+  }
+
+  moveElementToFront(id) {
+    const element = this.getElementById(id);
+    if (element) {
+      element.zOrder = this.getNextZOrder();
+      this.dirty = true;
+      return true;
+    }
+    return false;
+  }
+
+  moveElementToBack(id) {
+    const element = this.getElementById(id);
+    if (element) {
+      element.zOrder = this.getMinZOrder();
+      this.dirty = true;
+      return true;
+    }
+    return false;
+  }
+
   createElement(type, props = {}) {
     const id = props.id || `${type}_${this.nextId++}`;
     let element;
@@ -132,6 +162,8 @@ class MatDocument {
         throw new Error(`Unknown element type: ${type}`);
     }
 
+    element.zOrder = props.zOrder ?? this.getNextZOrder();
+
     this.elements.push(element);
     this.dirty = true;
     return element;
@@ -224,7 +256,8 @@ class MatDocument {
             x0_cm: elem.x0_cm,
             y0_cm: elem.y0_cm,
             x1_cm: elem.x1_cm,
-            y1_cm: elem.y1_cm
+            y1_cm: elem.y1_cm,
+            zOrder: elem.zOrder
           });
           break;
 
@@ -234,7 +267,8 @@ class MatDocument {
             id: elem.id,
             type: elem.type === 'circle' ? 'target' : 'ball_marker',
             center_cm: { ...elem.center_cm },
-            radius_cm: elem.radius_cm
+            radius_cm: elem.radius_cm,
+            zOrder: elem.zOrder
           });
           break;
 
@@ -247,7 +281,8 @@ class MatDocument {
             to_cm: { ...elem.to_cm },
             lineStyle: elem.lineStyle,
             stroke: elem.stroke,
-            strokeWidth: elem.strokeWidth
+            strokeWidth: elem.strokeWidth,
+            zOrder: elem.zOrder
           });
           break;
 
@@ -258,7 +293,8 @@ class MatDocument {
             center_cm: { ...elem.center_cm },
             radius_cm: elem.radius_cm,
             startAngle: elem.startAngle,
-            endAngle: elem.endAngle
+            endAngle: elem.endAngle,
+            zOrder: elem.zOrder
           });
           break;
 
@@ -273,7 +309,8 @@ class MatDocument {
             fontSize: elem.fontSize,
             fontStyle: elem.fontStyle,
             fill: elem.fill,
-            textAnchor: elem.textAnchor
+            textAnchor: elem.textAnchor,
+            zOrder: elem.zOrder
           });
           break;
 
@@ -288,7 +325,8 @@ class MatDocument {
             endAngle: elem.endAngle,
             fill: elem.fill,
             stroke: elem.stroke,
-            strokeWidth: elem.strokeWidth
+            strokeWidth: elem.strokeWidth,
+            zOrder: elem.zOrder
           });
           break;
       }
@@ -324,7 +362,8 @@ class MatDocument {
           x0_cm: area.x0_cm,
           y0_cm: area.y0_cm,
           x1_cm: area.x1_cm,
-          y1_cm: area.y1_cm
+          y1_cm: area.y1_cm,
+          zOrder: area.zOrder
         });
       }
     }
@@ -336,7 +375,8 @@ class MatDocument {
         this.createElement(type, {
           id: marker.id,
           center_cm: marker.center_cm,
-          radius_cm: marker.radius_cm || 1
+          radius_cm: marker.radius_cm || 1,
+          zOrder: marker.zOrder
         });
       }
     }
@@ -346,10 +386,10 @@ class MatDocument {
       for (const arc of json.arcs) {
         this.createElement('arc', {
           id: arc.id,
-          center_cm: arc.center_cm,
           radius_cm: arc.radius_cm,
           startAngle: arc.startAngle || 180,
-          endAngle: arc.endAngle || 360
+          endAngle: arc.endAngle || 360,
+          zOrder: arc.zOrder
         });
       }
     }
@@ -372,7 +412,8 @@ class MatDocument {
           fontSize: text.fontSize,
           fontStyle: text.fontStyle,
           fill: text.fill,
-          textAnchor: text.textAnchor
+          textAnchor: text.textAnchor,
+          zOrder: text.zOrder
         });
       }
     }
@@ -389,7 +430,8 @@ class MatDocument {
           endAngle: sector.endAngle,
           fill: sector.fill,
           stroke: sector.stroke,
-          strokeWidth: sector.strokeWidth
+          strokeWidth: sector.strokeWidth,
+          zOrder: sector.zOrder
         });
       }
     }
@@ -404,7 +446,8 @@ class MatDocument {
           to_cm: line.to_cm,
           lineStyle: line.lineStyle,
           stroke: line.stroke,
-          strokeWidth: line.strokeWidth
+          strokeWidth: line.strokeWidth,
+          zOrder: line.zOrder
         });
       }
     };
@@ -518,8 +561,9 @@ class CanvasRenderer {
     // Render grid
     this.renderGrid();
 
-    // Render all elements
-    for (const element of this.document.elements) {
+    // Render all elements sorted by zOrder
+    const sortedElements = [...this.document.elements].sort((a, b) => (a.zOrder || 0) - (b.zOrder || 0));
+    for (const element of sortedElements) {
       this.renderElement(element);
     }
 
@@ -1059,6 +1103,22 @@ class MatLayoutEditor {
           this.selectElement(newElem.id);
           this.updateStatus('Element duplicated');
         }
+      }
+    });
+
+    document.getElementById('btn-move-front').addEventListener('click', () => {
+      if (this.document.selectedId) {
+        this.document.moveElementToFront(this.document.selectedId);
+        this.render();
+        this.updateStatus('Moved to front');
+      }
+    });
+
+    document.getElementById('btn-move-back').addEventListener('click', () => {
+      if (this.document.selectedId) {
+        this.document.moveElementToBack(this.document.selectedId);
+        this.render();
+        this.updateStatus('Moved to back');
       }
     });
   }
