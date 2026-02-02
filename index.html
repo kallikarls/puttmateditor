@@ -196,8 +196,8 @@
         </div>
 
         <!-- Mat Properties (shown when no element selected) -->
-        <div id="mat-properties" class="panel-section">
-          <h3>Mat Dimensions</h3>
+        <div id="mat-properties" class="panel-section panel-section-scrollable">
+          <h3>Mat Properties</h3>
           <div class="property-row">
             <label for="mat-width">Width (cm)</label>
             <input type="number" id="mat-width" value="50" min="10" max="200" step="0.5">
@@ -213,8 +213,8 @@
         </div>
 
         <!-- Element Properties (shown when element selected) -->
-        <div id="element-properties" class="panel-section" style="display: none;">
-          <h3>Selected Element</h3>
+        <div id="element-properties" class="panel-section panel-section-scrollable" style="display: none;">
+          <h3>Element Properties</h3>
           <div class="property-row">
             <label for="elem-id">ID</label>
             <input type="text" id="elem-id" placeholder="element_id">
@@ -467,7 +467,7 @@
                   style="width:14px; height:14px; margin-right:4px;">
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                 </svg>
-                Front
+                To Front
               </button>
               <button id="btn-move-back" class="btn btn-secondary" style="flex:1; font-size: 0.8rem;"
                 title="Move to Back">
@@ -475,14 +475,14 @@
                   style="width:14px; height:14px; margin-right:4px;">
                   <path d="M12 22l10-5-10-5-10 5 10 5zM22 7l-10-5-10 5M22 12l-10-5-10 5" />
                 </svg>
-                Back
+                To Back
               </button>
             </div>
           </div>
         </div>
 
         <!-- Elements List -->
-        <div class="panel-section">
+        <div class="panel-section panel-section-grow">
           <h3>Elements</h3>
           <div id="elements-list" class="elements-list">
             <!-- Populated dynamically -->
