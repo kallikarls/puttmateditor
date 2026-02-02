@@ -24,7 +24,7 @@ A web-based editor for creating and modifying putting mat layouts for the Camera
 
 ## Usage
 
-1.  **Open the Editor**: [Link to your GitHub Pages URL will go here]
+1.  **Open the Editor**: [Live Version on GitHub Pages](https://kallikarls.github.io/puttmateditor/)
 2.  **Create/Load**: Start fresh or load an existing `layout.json`.
 3.  **Edit**: Use the toolbar to add elements. Select elements to edit properties.
 4.  **Save**: Download the modified JSON file.
