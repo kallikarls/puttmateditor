@@ -12,6 +12,7 @@
 
 <body>
   <div id="app">
+    <input type="file" id="file-input" accept=".json" style="display: none;" />
     <!-- Header -->
     <header class="header">
       <div class="header-brand">
@@ -169,24 +170,32 @@
 
       <!-- Canvas Area -->
       <div class="canvas-container" id="canvas-container">
-        <div class="canvas-info" id="canvas-info">
-          <span id="zoom-level">100%</span>
-          <span id="cursor-pos">X: 0 cm, Y: 0 cm</span>
+        <!-- Rulers -->
+        <div class="ruler-corner"></div>
+        <canvas id="ruler-x"></canvas>
+        <canvas id="ruler-y"></canvas>
+
+        <!-- Main Viewport -->
+        <div id="viewport-area" style="position: relative; width: 100%; height: 100%; overflow: hidden;">
+          <div class="canvas-info" id="canvas-info">
+            <span id="zoom-level">100%</span>
+            <span id="cursor-pos">X: 0 cm, Y: 0 cm</span>
+          </div>
+          <svg id="canvas" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+            <defs>
+              <pattern id="grid-small" width="10" height="10" patternUnits="userSpaceOnUse">
+                <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.5" />
+              </pattern>
+              <pattern id="grid-large" width="50" height="50" patternUnits="userSpaceOnUse">
+                <rect width="50" height="50" fill="url(#grid-small)" />
+                <path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+              </pattern>
+            </defs>
+            <g id="canvas-grid"></g>
+            <g id="canvas-content"></g>
+            <g id="canvas-handles"></g>
+          </svg>
         </div>
-        <svg id="canvas" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="grid-small" width="10" height="10" patternUnits="userSpaceOnUse">
-              <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.5" />
-            </pattern>
-            <pattern id="grid-large" width="50" height="50" patternUnits="userSpaceOnUse">
-              <rect width="50" height="50" fill="url(#grid-small)" />
-              <path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
-            </pattern>
-          </defs>
-          <g id="canvas-grid"></g>
-          <g id="canvas-content"></g>
-          <g id="canvas-handles"></g>
-        </svg>
       </div>
 
       <!-- Property Panel -->

@@ -478,25 +478,95 @@ class CanvasRenderer {
     this.contentGroup = svgElement.querySelector('#canvas-content');
     this.handlesGroup = svgElement.querySelector('#canvas-handles');
     this.gridGroup = svgElement.querySelector('#canvas-grid');
+    this.rulerX = window.document.querySelector('#ruler-x');
+    this.rulerY = window.document.querySelector('#ruler-y');
 
     // View transform
     this.viewBox = { x: -20, y: -20, width: 100, height: 450 };
     this.scale = 1;
 
+    // Resize observer for rulers
+    this.resizeObserver = new ResizeObserver(() => this.resizeRulers());
+    this.resizeObserver.observe(this.rulerX);
+    this.resizeObserver.observe(this.rulerY);
+
     this.setupViewBox();
+  }
+
+  resizeRulers() {
+    // Match canvas internal resolution to display size
+    const rectX = this.rulerX.getBoundingClientRect();
+    const rectY = this.rulerY.getBoundingClientRect();
+
+    this.rulerX.width = rectX.width;
+    this.rulerX.height = rectX.height;
+    this.rulerY.width = rectY.width;
+    this.rulerY.height = rectY.height;
+
+    // Adjust viewBox to match new aspect ratio to prevent distortion (since preserveAspectRatio="none")
+    // We try to maintain the current scale (zoom level) and center
+    const containerRect = this.svg.getBoundingClientRect();
+    if (containerRect.width > 0 && containerRect.height > 0 && this.viewBox.width > 0) {
+      const currentPxPerCm = containerRect.width / this.viewBox.width;
+
+      // Calculate new view dimensions based on current scale
+      const newViewWidth = containerRect.width / currentPxPerCm;
+      const newViewHeight = containerRect.height / currentPxPerCm;
+
+      const centerX = this.viewBox.x + this.viewBox.width / 2;
+      const centerY = this.viewBox.y + this.viewBox.height / 2;
+
+      this.viewBox.x = centerX - newViewWidth / 2;
+      this.viewBox.y = centerY - newViewHeight / 2;
+      this.viewBox.width = newViewWidth;
+      this.viewBox.height = newViewHeight;
+
+      this.updateViewBox(); // This calls drawRulers
+    } else {
+      this.drawRulers();
+    }
   }
 
   setupViewBox() {
     const matWidth = this.document.mat.width_cm;
     const matLength = this.document.mat.length_cm;
 
-    // Add padding around the mat
+    // Desired bounds (Mat + Padding)
     const padding = 30;
+    const boundsX = -padding;
+    const boundsY = -padding;
+    const boundsW = matWidth + padding * 2;
+    const boundsH = matLength + padding * 2;
+
+    // Get container aspect ratio
+    const containerRect = this.svg.getBoundingClientRect();
+    let containerW = containerRect.width;
+    let containerH = containerRect.height;
+
+    // Fallback if container size is not yet available (e.g. init)
+    if (containerW === 0 || containerH === 0) {
+      containerW = 800;
+      containerH = 600;
+    }
+
+    // "Fit" logic: Find scale that fits bounds into container
+    const scaleX = containerW / boundsW;
+    const scaleY = containerH / boundsH;
+    const scale = Math.min(scaleX, scaleY); // Fit entirely
+
+    // Calculate new viewBox dimensions to fill container at that scale
+    const viewW = containerW / scale;
+    const viewH = containerH / scale;
+
+    // Center the bounds in the new view
+    const viewX = boundsX + (boundsW - viewW) / 2;
+    const viewY = boundsY + (boundsH - viewH) / 2;
+
     this.viewBox = {
-      x: -padding,
-      y: -padding,
-      width: matWidth + padding * 2,
-      height: matLength + padding * 2
+      x: viewX,
+      y: viewY,
+      width: viewW,
+      height: viewH
     };
 
     this.updateViewBox();
@@ -505,6 +575,112 @@ class CanvasRenderer {
   updateViewBox() {
     const { x, y, width, height } = this.viewBox;
     this.svg.setAttribute('viewBox', `${x} ${y} ${width} ${height}`);
+    this.drawRulers();
+  }
+
+  drawRulers() {
+    if (!this.rulerX || !this.rulerY) return;
+
+    const ctxX = this.rulerX.getContext('2d');
+    const ctxY = this.rulerY.getContext('2d');
+    const widthX = this.rulerX.width;
+    const heightX = this.rulerX.height; // Is 20px usually
+    const widthY = this.rulerY.width;   // Is 20px usually
+    const heightY = this.rulerY.height;
+
+    // Clear
+    ctxX.clearRect(0, 0, widthX, heightX);
+    ctxY.clearRect(0, 0, widthY, heightY);
+
+    // Styling
+    ctxX.fillStyle = '#8b949e';
+    ctxX.font = '10px Inter';
+    ctxX.textAlign = 'center';
+    ctxX.textBaseline = 'top';
+
+    ctxY.fillStyle = '#8b949e';
+    ctxY.font = '10px Inter';
+    ctxY.textAlign = 'right';
+    ctxY.textBaseline = 'middle';
+
+    // Calculate mapping: SVG (cm) -> Screen (px)
+    // Horizontal: this.viewBox.x maps to pixel 0, this.viewBox.x + width maps to pixel widthX
+    // Vertical:   this.viewBox.y maps to pixel 0, this.viewBox.y + height maps to pixel heightY
+
+    // Scale factor (px per cm)
+    const pxPerCmX = widthX / this.viewBox.width;
+    const pxPerCmY = heightY / this.viewBox.height;
+
+    // Determine tick interval
+    // Ideally we want labels every ~50-100 pixels
+    const targetPxInterval = 80;
+    const cmIntervalCandidate = targetPxInterval / pxPerCmX; // e.g. 5cm or 10cm
+
+    // Find nice round step: 1, 2, 5, 10, 20, 50, 100
+    const steps = [1, 2, 5, 10, 20, 50, 100, 200, 500];
+    let step = steps[0];
+    for (const s of steps) {
+      if (s >= cmIntervalCandidate) {
+        step = s;
+        break;
+      }
+    }
+
+    // --- Draw X Ruler ---
+    const startX = Math.floor(this.viewBox.x / step) * step;
+    const endX = this.viewBox.x + this.viewBox.width;
+
+    ctxX.beginPath();
+    for (let cm = Math.max(0, startX); cm <= endX; cm += step) {
+      const px = (cm - this.viewBox.x) * pxPerCmX;
+
+      // Major tick
+      ctxX.moveTo(px, 0);
+      ctxX.lineTo(px, heightX);
+      ctxX.fillText(cm.toString(), px, heightX - 12); // adjusting text pos
+    }
+    // Subdivisions (optional, if space permits)
+    if (step >= 5) {
+      const subStep = step / 5; // e.g., 2 for 10
+      for (let cm = Math.max(0, startX); cm <= endX; cm += subStep) {
+        if (cm < 0) continue;
+        const px = (cm - this.viewBox.x) * pxPerCmX;
+        ctxX.moveTo(px, heightX - 4);
+        ctxX.lineTo(px, heightX);
+      }
+    }
+    ctxX.strokeStyle = '#30363d'; // Dark gray border color
+    ctxX.stroke();
+
+
+    // --- Draw Y Ruler ---
+    const startY = Math.floor(this.viewBox.y / step) * step;
+    const endY = this.viewBox.y + this.viewBox.height;
+
+    ctxY.beginPath();
+    for (let cm = Math.max(0, startY); cm <= endY; cm += step) {
+      const px = (cm - this.viewBox.y) * pxPerCmY;
+
+      // Major tick
+      ctxY.moveTo(0, px);
+      ctxY.lineTo(widthY, px);
+
+      // Rotate text for vertical ruler? Or just draw horizontally
+      // Drawing horizontally
+      ctxY.fillText(cm.toString(), widthY - 2, px);
+    }
+    // Subdivisions
+    if (step >= 5) {
+      const subStep = step / 5;
+      for (let cm = Math.max(0, startY); cm <= endY; cm += subStep) {
+        if (cm < 0) continue;
+        const px = (cm - this.viewBox.y) * pxPerCmY;
+        ctxY.moveTo(widthY - 4, px);
+        ctxY.lineTo(widthY, px);
+      }
+    }
+    ctxY.strokeStyle = '#30363d';
+    ctxY.stroke();
   }
 
   zoom(factor, centerX = null, centerY = null) {
